@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 
 @RestController
@@ -72,7 +73,7 @@ public class UserinfoHandler {
         ObjectMapper objectMapper = new ObjectMapper();
         if(result != null){
             if(result.getPass().equals(userinfo.getPass())){
-                map.put("message","token" + "_" + userinfo.getUsername() + "_" + userinfo.getPass());
+                map.put("message","token" + "_" + result.getId() + "_" + userinfo.getPass());
 
             }
             else{
@@ -89,12 +90,21 @@ public class UserinfoHandler {
 
     @GetMapping("/check")
     public String check(@RequestHeader Map<String, Object> header) throws JsonProcessingException {
+//        System.out.println(header);
         Map<String,String> map = new HashMap<>();
         ObjectMapper objectMapper = new ObjectMapper();
         if(header.get("authorization") != null){
             String token = (String) header.get("authorization");
-            String username = token.split("_")[1];
-            map.put("message",username);
+            String userid = token.split("_")[1];
+            map.put("message",userid);
+            if(userid != null){
+                Integer id = Integer.valueOf(userid);
+                Userinfo userinfo = userinfoRespository.findById(id).get();
+
+                map.put("name",userinfo.getUsername());
+            }
+
+
         }
         else{
             map.put("message","error");
